@@ -1,4 +1,4 @@
-const couresService = require('./coures.service.js')
+const courseService = require('./course.service.js')
 
 const logger = require('../../services/logger.service.js')
 
@@ -11,7 +11,7 @@ async function getCoures(req, res) {
     }
     console.log('filterBy',filterBy);
     
-    const coures = await couresService.query(filterBy)    
+    const coures = await courseService.query(filterBy)    
     res.json(coures)
   } catch (err) {
     logger.error('Failed to get couress', err)
@@ -22,7 +22,8 @@ async function getCoures(req, res) {
 async function getCouresById(req, res) {
   try {
     const couresId = req.params.id
-    const coures = await couresService.getById(couresId)    
+    console.log('couresId in course controller ',couresId);
+    const coures = await courseService.getById(couresId)    
     res.json(coures)
   } catch (err) {
     logger.error('Failed to get coures', err)
@@ -33,7 +34,9 @@ async function getCouresById(req, res) {
 async function addCoures(req, res) {
   try {
     const coures = req.body    
-    const addedCoures = await couresService.add(coures)
+    
+    const addedCoures = await courseService.add(coures)
+    console.log('coures in controller',addedCoures);
     res.json(addedCoures)
   } catch (err) {
     logger.error('Failed to add coures', err)
@@ -44,12 +47,15 @@ async function addCoures(req, res) {
 
 async function updateCoures(req, res) {
   try {
-    const coures = req.body
-    const updatedCoures = await couresService.update(coures)    
-    res.json(updatedCoures)
+    const course = req.body
+    console.log('updatedCourse in course controller',course);
+    const updatedCourse = await courseService.update(course)    
+    console.log('updatedCourse in couse controller',updatedCourse);
+    
+    res.json(updatedCourse)
   } catch (err) {
-    logger.error('Failed to update coures', err)
-    res.status(500).send({ err: 'Failed to update coures' })
+    logger.error('Failed to update course', err)
+    res.status(500).send({ err: 'Failed to update course' })
 
   }
 }
@@ -57,7 +63,7 @@ async function updateCoures(req, res) {
 async function removeCoures(req, res) {
   try {
     const couresId = req.params.id
-    const removedId = await couresService.remove(couresId)
+    const removedId = await courseService.remove(couresId)
     res.send(removedId)
   } catch (err) {
     logger.error('Failed to remove coures', err)
@@ -73,7 +79,7 @@ async function addCouresMsg(req, res) {
       txt: req.body.txt,
       by: loggedinUser
     }
-    const savedMsg = await couresService.addCouresMsg(couresId, msg)
+    const savedMsg = await courseService.addCouresMsg(couresId, msg)
     res.json(savedMsg)
   } catch (err) {
     logger.error('Failed to update coures', err)
@@ -88,7 +94,7 @@ async function removeCouresMsg(req, res) {
     const couresId = req.params.id
     const {msgId} = req.params
 
-    const removedId = await couresService.removeCouresMsg(couresId, msgId)
+    const removedId = await courseService.removeCouresMsg(couresId, msgId)
     res.send(removedId)
   } catch (err) {
     logger.error('Failed to remove coures msg', err)

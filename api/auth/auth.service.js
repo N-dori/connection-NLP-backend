@@ -1,6 +1,7 @@
 const Cryptr = require('cryptr')
 const bcrypt = require('bcrypt')
 const userService = require('../user/user.service')
+const utilService = require('../../services/util.service')
 const logger = require('../../services/logger.service')
 const cryptr = new Cryptr(process.env.SECRET1 || 'Secret-Puk-1234')
 
@@ -8,29 +9,41 @@ module.exports = {
     signup,
     login,
     getLoginToken,
-    validateToken
+    validateToken,
+    getLoggedinUser,
 }
-
-async function login(userName, password) {
+async function getLoggedinUser (req,res) {
     try{
-        logger.debug(`auth.service - login with userName: ${userName}`)
-        const user = await userService.getByUsername(userName)
-        console.log('userrrrrrrrrrrrrr',user);
+
+        const loggedinUser = validateToken(req.cookies.loginToken)
+        // console.log('loggedinUser',loggedinUser);
+        return loggedinUser
+
+    }catch (err){
+        console.log('could not get loggedinUser',err);
         
-        if (!user) return Promise.reject('Invalid userName or password')
+    }
+}
+async function login(username, password) {
+    try{
+        logger.debug(`auth.service - login with userName: ${username}`)
+        const user = await userService.getByUserName(username)
+        // console.log('user found by name : ',user);
+        
+        if (!user) return Promise.reject('user was not found Invalid username or password')
         // TODO: un-comment for real login
         const match = await bcrypt.compare(password, user.password)
-        if (!match) return Promise.reject('Invalid userName or password!!!!!')
+        if (!match) return Promise.reject('Invalid username or password!!!!!')
     
         delete user.password
         user._id = user._id.toString()
-        console.log('user service', user);
+        console.log('user in service -login function :', user);
         return user
 
     }
     catch(err)
     {
-    logger.debug(`auth.service -failed to login with userName: ${userName}, fullname: ${fname}`)
+    logger.debug(`auth.service -failed to login with userName: ${username}, fullname: ${fname}`)
 }
 }
    
@@ -42,15 +55,14 @@ async function signup({userName, password, email, fname, imgUrl,courses}) {
     
     // if (userExist) return Promise.reject('userName already taken')
     //no password because this is googleUser
-    if(!password){
-        const userExist = await userService.getByUsername(userName)
-        console.log('userExist userExist userExist',userExist); 
-        if(userExist){
-            return userExist
-        } else {
-            return userService.add(user)
-
-        }
+    const userExist = await userService.getByUserEmail(email)
+    // console.log('userExist userExist userExist',userExist); 
+    
+    if(userExist){
+        return userExist
+    } else {
+        if(!password){
+        return userService.add(user)
     } else{
         const hash = await bcrypt.hash(password, saltRounds)
         const user= { userName, password: hash,email, fname, imgUrl ,courses }
@@ -58,12 +70,14 @@ async function signup({userName, password, email, fname, imgUrl,courses}) {
         console.log('user in service signup',user);
         return userService.add(user)
 
+    }
+
     }   
 }
 
 
 function getLoginToken(user) {
-    const userInfo = {_id : user._id, fullname: user.fullname, isAdmin: user.isAdmin}
+    const userInfo = {_id : user._id, fname: user.fname, isAdmin: user.isAdmin}
     return cryptr.encrypt(JSON.stringify(userInfo))    
 }
 

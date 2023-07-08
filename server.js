@@ -8,7 +8,7 @@ const http = require('http').createServer(app)
 
 // Express App Config
 app.use(cookieParser())
-app.use(express.json())
+app.use(express.json({limit: '50mb'}))
 
 
 const corsOptions = {
@@ -25,7 +25,7 @@ const authRoutes = require('./api/auth/auth.routes')
 const orderRoutes = require('./api/order/order.routes')
 const userRoutes = require('./api/user/user.routes')
 const reviewRoutes = require('./api/review/review.routes')
-const couresRoutes = require('./api/coures/coures.routes')
+const courseRoutes = require('./api/coures/course.routes')
 const {setupSocketAPI} = require('./services/socket.service')
 
 // routes
@@ -36,7 +36,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/order', orderRoutes)
 app.use('/api/user', userRoutes)
 app.use('/api/review', reviewRoutes)
-app.use('/api/coures', couresRoutes)
+app.use('/api/course', courseRoutes)
 // socketService.setUp(http)
 
 // Make every server-side-route to match the index.html
