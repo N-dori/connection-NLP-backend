@@ -21,6 +21,7 @@ if (process.env.NODE_ENV === 'production') {
     app.use(cors(corsOptions))
 }
 
+const announcementRoutes = require('./api/announcement/announcement.routes')
 const authRoutes = require('./api/auth/auth.routes')
 const orderRoutes = require('./api/order/order.routes')
 const userRoutes = require('./api/user/user.routes')
@@ -32,6 +33,7 @@ const {setupSocketAPI} = require('./services/socket.service')
 const setupAsyncLocalStorage = require('./middlewares/setupAls.middleware')
 app.all('*', setupAsyncLocalStorage)
 
+app.use('/api/announcement', announcementRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/order', orderRoutes)
 app.use('/api/user', userRoutes)

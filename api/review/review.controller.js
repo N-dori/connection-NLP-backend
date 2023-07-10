@@ -1,78 +1,115 @@
-const logger = require('../../services/logger.service')
-const userService = require('../user/user.service')
-const authService = require('../auth/auth.service')
-const socketService = require('../../services/socket.service')
-const reviewService = require('./review.service')
+const reviewService = require('./review.service.js')
 
-async function getReviews(req, res) {
-    try {
-        const reviews = await reviewService.query(req.query)
-        res.send(reviews)
-    } catch (err) {
-        logger.error('Cannot get reviews', err)
-        res.status(500).send({ err: 'Failed to get reviews' })
+const logger = require('../../services/logger.service.js')
+
+async function getReview(req, res) {
+  try {
+    logger.debug('Getting Reviews')
+    const filterBy = {
+      txt: req.query.title || '',
+    
     }
+    console.log('filterBy',filterBy);
+    
+    const review = await reviewService.query(filterBy)    
+    res.json(review)
+  } catch (err) {
+    logger.error('Failed to get reviews', err)
+    res.status(500).send({ err: 'Failed to get reviews' })
+  }
 }
 
-async function deleteReview(req, res) {
-    try {
-        const deletedCount = await reviewService.remove(req.params.id)
-        if (deletedCount === 1) {
-            res.send({ msg: 'Deleted successfully' })
-        } else {
-            res.status(400).send({ err: 'Cannot remove review' })
-        }
-    } catch (err) {
-        logger.error('Failed to delete review', err)
-        res.status(500).send({ err: 'Failed to delete review' })
-    }
+async function getReviewById(req, res) {
+  try {
+    const reviewId = req.params.id
+    console.log('reviewId in review controller ',reviewId);
+    const review = await reviewService.getById(reviewId)    
+    res.json(review)
+  } catch (err) {
+    logger.error('Failed to get review', err)
+    res.status(500).send({ err: 'Failed to get review' })
+  }
 }
-
 
 async function addReview(req, res) {
+  try {
+    const review = req.body    
     
-    var {loggedinUser} = req
- 
-    try {
-        var review = req.body
-        console.log('review',loggedinUser)
-        review.byUserId = loggedinUser._id
-        review = await reviewService.add(review)
-        
-        // prepare the updated review for sending out
-        review.aboutUser = await userService.getById(review.aboutUserId)
-        
-        // Give the user credit for adding a review
-        // var user = await userService.getById(review.byUserId)
-        // user.score += 10
-        loggedinUser.score += 10
+    const addedReview = await reviewService.add(review)
+    console.log('review in controller',addedReview);
+    res.json(addedReview)
+  } catch (err) {
+    logger.error('Failed to add review', err)
+    res.status(500).send({ err: 'Failed to add review' })
+  }
+}
 
-        loggedinUser = await userService.update(loggedinUser)
-        review.byUser = loggedinUser
 
-        // User info is saved also in the login-token, update it
-        const loginToken = authService.getLoginToken(loggedinUser)
-        res.cookie('loginToken', loginToken)
+async function updateReview(req, res) {
+  try {
+    const review = req.body
+    
+    console.log('updatedReview in review controller',review);
+    const updatedReview = await reviewService.update(review)    
+    console.log('updatedReview in couse controller',updatedReview);
+    
+    res.json(updatedReview)
+  } catch (err) {
+    logger.error('Failed to update review', err)
+    res.status(500).send({ err: 'Failed to update review' })
 
-        delete review.aboutUserId
-        delete review.byUserId
+  }
+}
 
-        socketService.broadcast({type: 'review-added', data: review, userId: loggedinUser._id})
-        socketService.emitToUser({type: 'review-about-you', data: review, userId: review.aboutUser._id})
-        
-        const fullUser = await userService.getById(loggedinUser._id)
-        socketService.emitTo({type: 'user-updated', data: fullUser, label: fullUser._id})
+async function removeReview(req, res) {
+  try {
+    const reviewId = req.params.id
+    const removedId = await reviewService.remove(reviewId)
+    res.send(removedId)
+  } catch (err) {
+    logger.error('Failed to remove review', err)
+    res.status(500).send({ err: 'Failed to remove review' })
+  }
+}
 
-        res.send(review)
-
-    } catch (err) {
-        logger.error('Failed to add review', err)
-        res.status(500).send({ err: 'Failed to add review' })
+async function addReviewMsg(req, res) {
+  const {loggedinUser} = req
+  try {
+    const reviewId = req.params.id
+    const msg = {
+      txt: req.body.txt,
+      by: loggedinUser
     }
+    const savedMsg = await reviewService.addReviewMsg(reviewId, msg)
+    res.json(savedMsg)
+  } catch (err) {
+    logger.error('Failed to update review', err)
+    res.status(500).send({ err: 'Failed to update review' })
+
+  }
+}
+
+async function removeReviewMsg(req, res) {
+  const {loggedinUser} = req
+  try {
+    const reviewId = req.params.id
+    const {msgId} = req.params
+
+    const removedId = await reviewService.removeReviewMsg(reviewId, msgId)
+    res.send(removedId)
+  } catch (err) {
+    logger.error('Failed to remove review msg', err)
+    res.status(500).send({ err: 'Failed to remove review msg' })
+
+  }
 }
 
 module.exports = {
-    getReviews,
-    deleteReview,
-    addReview
+  getReview,
+  getReviewById,
+  addReview,
+  updateReview,
+  removeReview,
+  addReviewMsg,
+  removeReviewMsg
 }
