@@ -34,6 +34,15 @@ async function deleteUser(req, res) {
         res.status(500).send({ err: 'Failed to delete user' })
     }
 }
+async function clearGuestCart(req, res) {
+    try {
+        await userService.clearGuestCart()
+        res.send({ msg: 'Deleted successfully' })
+    } catch (err) {
+        logger.error('Failed to clearGuestCart', err)
+        res.status(500).send({ err: 'Failed to clearGuestCart ' })
+    }
+}
 
 async function updateUser(req, res) {
     try {
@@ -52,5 +61,6 @@ module.exports = {
     getUser,
     getUsers,
     deleteUser,
-    updateUser
+    updateUser,
+    clearGuestCart
 }

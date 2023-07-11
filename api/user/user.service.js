@@ -11,7 +11,8 @@ module.exports = {
     getByUserName,
     remove,
     update,
-    add
+    add,
+    clearGuestCart,
 }
 
 async function query(filterBy = {}) {
@@ -85,6 +86,24 @@ async function remove(userId) {
         await collection.deleteOne({ _id: ObjectId(userId) })
     } catch (err) {
         logger.error(`cannot remove user ${userId}`, err)
+        throw err
+    }
+}
+async function clearGuestCart() {
+    try {
+        // peek only updatable properties
+        const userToSave = {
+            _id: ObjectId('64abe02a8723e73efc4d4be8'), // needed for the returnd obj
+            cart:[],
+       
+        }
+        const collection = await dbService.getCollection('user')
+        //on the left side is the object to update, on the rigth is the keys we want to change
+        await collection.updateOne({ _id: userToSave._id }, { $set: userToSave })
+        return userToSave
+    }
+     catch (err) {
+        logger.error(`cannot update user ${user._id}`, err)
         throw err
     }
 }
