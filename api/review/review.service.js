@@ -1,20 +1,19 @@
-//1בסד
-
+const socketService = require('../../services/socket.service.js')
 const dbService = require('../../services/db.service')
 const logger = require('../../services/logger.service')
 const utilService = require('../../services/util.service')
 const ObjectId = require('mongodb').ObjectId
 
 
-async function query(filterBy = { txt: ''}) {
+async function query(filterBy = { txt: '' }) {
     try {
         const criteria = {
             title: { $regex: filterBy.txt, $options: 'i' }
         }
         const collection = await dbService.getCollection('review')
         var review = await collection.find({}).toArray()
-    //    console.log('reviews',review);
-       
+        //    console.log('reviews',review);
+
         return review
 
     } catch (err) {
@@ -47,10 +46,15 @@ async function remove(reviewId) {
 
 async function add(review) {
     try {
+        const msg = 'review added successfuly'
+        console.log('review.content', review.content);
+
+        socketService.emit('review-added', msg)
         const collection = await dbService.getCollection('review')
+
         await collection.insertOne(review)
         // console.log('added this one :',review);
-        
+
         return review
     } catch (err) {
         logger.error('cannot insert review', err)
@@ -64,7 +68,7 @@ async function update(review) {
             comments: review.comments,
 
         }
-        console.log('updatedReview in review controller',review);
+        console.log('updatedReview in review controller', review);
 
         const collection = await dbService.getCollection('review')
         await collection.updateOne({ _id: ObjectId(review._id) }, { $set: reviewToSave })

@@ -51,10 +51,10 @@ app.get('/**', (req, res) => {
 
 const logger = require('./services/logger.service')
 const port = process.env.PORT || 3030
-http.listen(port, () => {
-    logger.info('Server is running on porti: ' + port)
-})
-// socketService.setUp(http,corsOptions)
 // http.listen(port, () => {
-//     logger.info(`Server is running on port http://localhost:${port}`)
+//     logger.info('Server is running on porti: ' + port)
 // })
+socketService.setUp(http,corsOptions)
+http.listen(port, () => {
+    logger.info(`Server is running on port http://localhost:${port}`)
+})

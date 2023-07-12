@@ -3,7 +3,7 @@ const dbService = require('../../services/db.service')
 const logger = require('../../services/logger.service')
 const reviewService = require('../review/review.service')
 const ObjectId = require('mongodb').ObjectId
-
+const socketService = require('../../services/socket.service.js')
 module.exports = {
     query,
     getById,
@@ -116,6 +116,11 @@ async function update(user) {
             
             cart:user.cart,
             courses:user.courses,
+            
+        }
+        if(user.action === 'purchase'){
+            const msg = 'purchase-was-made'
+            socketService.emit('purchased', msg)
         }
         const collection = await dbService.getCollection('user')
         //on the left side is the object to update, on the rigth is the keys we want to change

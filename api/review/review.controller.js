@@ -1,5 +1,4 @@
 const reviewService = require('./review.service.js')
-
 const logger = require('../../services/logger.service.js')
 
 async function getReview(req, res) {
@@ -36,6 +35,8 @@ async function addReview(req, res) {
     const review = req.body    
     
     const addedReview = await reviewService.add(review)
+     
+
     console.log('review in controller',addedReview);
     res.json(addedReview)
   } catch (err) {
