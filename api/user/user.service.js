@@ -116,9 +116,9 @@ async function update(user) {
             
             cart:user.cart,
             courses:user.courses,
-            
         }
         if(user.action === 'purchase'){
+            delete user.action
             const msg = 'purchase-was-made'
             socketService.emit('purchased', msg)
         }
