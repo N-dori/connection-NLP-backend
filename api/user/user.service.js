@@ -21,13 +21,13 @@ async function query(filterBy = {}) {
         const collection = await dbService.getCollection('user')
         var users = await collection.find({}).toArray()
         
-        users = users.map(user => {
-            delete user.password
-            user.createdAt = ObjectId(user._id).getTimestamp()
-            // Returning fake fresh data
-            // user.createdAt = Date.now() - (1000 * 60 * 60 * 24 * 3) // 3 days ago
-            return user
-        })
+        // users = users.map(user => {
+        //     delete user.password
+        //     user.createdAt = ObjectId(user._id).getTimestamp()
+        //     // Returning fake fresh data
+        //     // user.createdAt = Date.now() - (1000 * 60 * 60 * 24 * 3) // 3 days ago
+        //     return user
+        // })
         return users
     } catch (err) {
         logger.error('cannot find users', err)
@@ -113,7 +113,8 @@ async function update(user) {
         // peek only updatable properties
         const userToSave = {
             _id: ObjectId(user._id), // needed for the returnd obj
-            
+            fname:user.fname,
+            email:user.email,
             cart:user.cart,
             courses:user.courses,
         }

@@ -11,6 +11,6 @@ router.get('/:id', getUser)
 router.put('/', /* requireAuth */  updateUser)
 router.delete('/', /* requireAuth */  clearGuestCart)
 
-// router.delete('/:id',  requireAuth, requireAdmin, deleteUser)
+router.delete('/:id',  /* requireAuth, requireAdmin */ deleteUser)
 
 module.exports = router

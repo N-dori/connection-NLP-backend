@@ -14,9 +14,9 @@ async function getUser(req, res) {
 
 async function getUsers(req, res) {
     try {
-       console.log('getting the users');
-       
+        
         const users = await userService.query()
+        console.log('getting the users',users);
         
         res.send(users)
     } catch (err) {
@@ -27,8 +27,12 @@ async function getUsers(req, res) {
 
 async function deleteUser(req, res) {
     try {
+        console.log('delete user in controller before ');
+        
         await userService.remove(req.params.id)
-        res.send({ msg: 'Deleted successfully' })
+        console.log('delete after  ');
+
+        // res.send({ msg: 'Deleted successfully' })
     } catch (err) {
         logger.error('Failed to delete user', err)
         res.status(500).send({ err: 'Failed to delete user' })
