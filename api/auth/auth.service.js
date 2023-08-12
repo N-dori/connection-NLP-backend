@@ -16,6 +16,7 @@ async function getLoggedinUser (req,res) {
     try{
 
         const loggedinUser = validateToken(req.cookies.loginToken)
+        
         // console.log('loggedinUser',loggedinUser);
         return loggedinUser
 
